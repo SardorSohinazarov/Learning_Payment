@@ -1,18 +1,40 @@
-﻿namespace Click_Integration.Models.Complate
+﻿using System.Text.Json.Serialization;
+
+namespace Click_Integration.Models.Complate
 {
     public class CompleteRequest
     {
-        public long ClickTransId { get; set; }        // CLICK tizimidagi to'lov ID si
-        public int ServiceId { get; set; }            // Xizmat ID si
-        public long ClickPaydocId { get; set; }       // CLICK tizimidagi to'lov raqami
-        public int MerchantTransId { get; set; }   // Buyurtma yoki billing ID si
-        public int MerchantPrepareId { get; set; }    // Prepare bosqichida olingan to'lov ID si
-        public float Amount { get; set; }             // To'lov summasi
-        public int Action { get; set; } = 1;          // Harakat turi: 1 - Complete uchun
-        public int Error { get; set; }                // To'lov holati (0 - muvaffaqiyatli, xato bo'lsa xato kodi)
-        public string ErrorNote { get; set; }         // Xato haqida izoh
-        public string SignTime { get; set; }          // To'lov vaqti (YYYY-MM-DD HH:mm:ss formatida)
-        public string SignString { get; set; }        // So'rov haqiqiyligini tasdiqlovchi MD5 hash
-    }
+        [JsonPropertyName("click_trans_id")]
+        public long ClickTransId { get; set; }  // CLICK tizimidagi to'lov ID
 
+        [JsonPropertyName("service_id")]
+        public int ServiceId { get; set; }      // Xizmatning ID raqami
+
+        [JsonPropertyName("click_paydoc_id")]
+        public long ClickPaydocId { get; set; } // CLICK tizimidagi to'lov ID raqami (SMSda ko'rsatiladi)
+
+        [JsonPropertyName("merchant_trans_id")]
+        public string MerchantTransId { get; set; } // Online do'kondagi buyurtma ID yoki shaxsiy kabinet
+
+        [JsonPropertyName("merchant_prepare_id")]
+        public int MerchantPrepareId { get; set; }  // Billing tizimidagi tayyorlangan to'lov ID
+
+        [JsonPropertyName("amount")]
+        public decimal Amount { get; set; }     // To'lov summasi (so'mda)
+
+        [JsonPropertyName("action")]
+        public int Action { get; set; } = 1;    // Harakat turi, bu bosqichda 1
+
+        [JsonPropertyName("error")]
+        public int Error { get; set; }          // To'lov holati (0 – muvaffaqiyatli, xatolik bo'lsa xato kodi)
+
+        [JsonPropertyName("error_note")]
+        public string ErrorNote { get; set; }   // Xato kodi izohi
+
+        [JsonPropertyName("sign_time")]
+        public string SignTime { get; set; }    // To'lov vaqti (format: "YYYY-MM-DD HH:mm:ss")
+
+        [JsonPropertyName("sign_string")]
+        public string SignString { get; set; }  // MD5 hash orqali tasdiqlash (click_trans_id + service_id + SECRET_KEY + ...)
+    }
 }
