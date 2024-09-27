@@ -7,7 +7,6 @@
         public string MerchantTransId { get; set; }
         public decimal Amount { get; set; }
         public DateTime SignTime { get; set; }
-        public int Situation { get; set; }
-        public string Status { get; set; }
+        public EOrderPaymentStatus Status { get; set; }
     }
 }

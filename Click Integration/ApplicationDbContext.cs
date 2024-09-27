@@ -8,6 +8,7 @@ namespace Click_Integration
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
             : base(options)
         {
+            Database.Migrate();
         }
 
         public DbSet<Order> Orders { get; set; }

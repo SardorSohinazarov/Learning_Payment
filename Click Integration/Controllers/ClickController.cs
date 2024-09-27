@@ -23,6 +23,13 @@ namespace Click_Integration.Controllers
             _clickConfig = configuration.GetSection("ClickConfig").Get<ClickConfig>();
         }
 
+        [HttpGet("Transactions")]
+        public async Task<IActionResult> GetTransactions()
+        {
+            var transactions = _context.ClickTransactions.ToList();
+            return Ok(transactions);
+        }
+
         [HttpPost("prepare")]
         public async Task<IActionResult> Prepare(PrepareRequest prepareRequest)
         {
@@ -36,9 +43,10 @@ namespace Click_Integration.Controllers
                                 prepareRequest.SignTime);
 
             if (prepareRequest.SignString != generatedSignString)
-            {
                 return BadRequest(new { error = -1, error_note = "Invalid sign_string" });
-            }
+
+            if (prepareRequest.MerchantTransId != "1")
+                return BadRequest(new { error = -6, error_note = "The transaction is not found (check parameter merchant_prepare_id)" });
 
             var clickTransaction = new ClickTransaction
             {
@@ -46,7 +54,7 @@ namespace Click_Integration.Controllers
                 MerchantTransId = prepareRequest.MerchantTransId,
                 Amount = prepareRequest.Amount,
                 SignTime = DateTime.Parse(prepareRequest.SignTime),
-                Status = "prepare"
+                Status = EOrderPaymentStatus.Pending,
             };
 
             _context.ClickTransactions.Add(clickTransaction);
@@ -59,7 +67,6 @@ namespace Click_Integration.Controllers
                 MerchantPrepareId = 1, //OrderId ni bervorelikchi
                 Error = 0,
                 ErrorNote = "Payment prepared successfully"
-
             };
 
             return Ok(response);
@@ -79,22 +86,14 @@ namespace Click_Integration.Controllers
                                 completeRequest.SignTime);
 
             if (completeRequest.SignString != generatedSignString)
-            {
                 return BadRequest(new { error = -1, error_note = "Invalid sign_string" });
-            }
+
+            if (completeRequest.MerchantTransId != "1")
+                return BadRequest(new { error = -6, error_note = "The transaction is not found (check parameter merchant_prepare_id)" });
 
             var clickTransaction = _context.ClickTransactions.FirstOrDefault(c => c.ClickTransId == completeRequest.ClickTransId);
             if (clickTransaction != null)
-            {
-                clickTransaction.Situation = 1;
-                clickTransaction.Status = "success";
-            }
-
-            var order = _context.Orders.FirstOrDefault(o => o.Id.ToString() == completeRequest.MerchantTransId);
-            if (order != null)
-            {
-                order.PaymentStatus = EOrderPaymentStatus.Paid;
-            }
+                clickTransaction.Status = EOrderPaymentStatus.Paid;
 
             _context.SaveChanges();
 
