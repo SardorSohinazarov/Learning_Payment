@@ -6,7 +6,7 @@ namespace Click_Integration.Controllers
     [ApiController]
     [Route("api/[controller]/[action]")]
 
-    public class OrderController : Controller
+    public class OrderController : ControllerBase
     {
         
     }

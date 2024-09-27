@@ -83,59 +83,29 @@ namespace Click_Integration.Controllers
                 return BadRequest(new { error = -1, error_note = "Invalid sign_string" });
             }
 
-            //if (error == 0)
-            if (0 == 0)
+            var clickTransaction = _context.ClickTransactions.FirstOrDefault(c => c.ClickTransId == completeRequest.ClickTransId);
+            if (clickTransaction != null)
             {
-                var clickTransaction = _context.ClickTransactions.FirstOrDefault(c => c.ClickTransId == completeRequest.ClickTransId);
-                if (clickTransaction != null)
-                {
-                    clickTransaction.Situation = 1;
-                    clickTransaction.Status = "success";
-                }
-
-                var order = _context.Orders.FirstOrDefault(o => o.Id == completeRequest.MerchantTransId);
-                if (order != null)
-                {
-                    order.PaymentStatus = EOrderPaymentStatus.Paid;
-                }
-
-                _context.SaveChanges();
-
-                return Ok(new CompleteResponse()
-                {
-                    ClickTransId = clickTransaction.ClickTransId,
-                    MerchantTransId = clickTransaction.MerchantTransId,
-                    MerchantConfirmId = clickTransaction.MerchantTransId,
-                    Error = 0,
-                    ErrorNote = "Payment Success"
-                });
+                clickTransaction.Situation = 1;
+                clickTransaction.Status = "success";
             }
-            else
+
+            var order = _context.Orders.FirstOrDefault(o => o.Id.ToString() == completeRequest.MerchantTransId);
+            if (order != null)
             {
-                var clickTransaction = _context.ClickTransactions.FirstOrDefault(c => c.ClickTransId == completeRequest.ClickTransId);
-                if (clickTransaction != null)
-                {
-                    clickTransaction.Situation = -9;
-                    clickTransaction.Status = "error";
-                }
-
-                var order = _context.Orders.FirstOrDefault(o => o.Id == completeRequest.MerchantTransId);
-                if (order != null)
-                {
-                    order.PaymentStatus = EOrderPaymentStatus.Cancelled;
-                }
-
-                _context.SaveChanges();
-
-                return Ok(new CompleteResponse()
-                {
-                    ClickTransId = clickTransaction.ClickTransId,
-                    MerchantTransId = clickTransaction.MerchantTransId,
-                    MerchantConfirmId = clickTransaction.MerchantTransId,
-                    Error = -9,
-                    ErrorNote = "Do not find a user!!!"
-                });
+                order.PaymentStatus = EOrderPaymentStatus.Paid;
             }
+
+            _context.SaveChanges();
+
+            return Ok(new CompleteResponse()
+            {
+                ClickTransId = clickTransaction.ClickTransId,
+                MerchantTransId = clickTransaction.MerchantTransId,
+                MerchantConfirmId = clickTransaction.Id,
+                Error = 0,
+                ErrorNote = "Payment Success"
+            });
         }
 
         [HttpGet("generate-click-link")]
